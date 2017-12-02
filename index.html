@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+
+        /**
+         *  CONFIG
+         */
+
+        const CONFIG = {
+            setup        : {
+                bittrex: {
+                    key: ""
+                }
+            },
+            notifications: [
+                {
+                    name  : "Twilio",
+                    status: "NOT_SETUP",
+
+                }
+            ]
+        }
+
+    </script>
+
+</head>
+<body>
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header" id="app">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <!-- Title -->
+            <span class="mdl-layout-title">Title</span>
+            <!-- Add spacer, to align navigation to the right -->
+            <div class="mdl-layout-spacer"></div>
+            <!-- Navigation. We hide it in small screens. -->
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                <a class="mdl-navigation__link" href="">Notifications</a>
+                <a class="mdl-navigation__link" href="">Holdings</a>
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Title</span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" href="">Notifications</a>
+            <a class="mdl-navigation__link" href="">Holdings</a>
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+        <div class="page-content">
+            <h1>New Notification</h1>
+            <form action="#">
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="interval" v-model="newNotification.interval">
+                    <label class="mdl-textfield__label" for="interval">Interval to check (seconds)</label>
+                    <span class="mdl-textfield__error">Input is not a number!</span>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="currency" v-model="newNotification.currency">
+                    <label class="mdl-textfield__label" for="currency">Currency to check</label>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" id="startingPrice" v-model="newNotification.startPrice">
+                    <label class="mdl-textfield__label" for="startingPrice">Starting price</label>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="percentUp" v-model="newNotification.percentUp">
+                    <label class="mdl-textfield__label" for="percentUp">Percentage Up</label>
+                    <span class="mdl-textfield__error">Input is not a number!</span>
+                </div>
+
+                <div class="mdl-textfield mdl-js-textfield">
+                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="percentDown" v-model="newNotification.percentDown">
+                    <label class="mdl-textfield__label" for="percentDown">Percentage Down</label>
+                    <span class="mdl-textfield__error">Input is not a number!</span>
+                </div>
+
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" @click.prevent="addNotification">
+                    Save Notification
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+<script>
+    const app = new Vue({
+        el     : '#app',
+        data   : {
+            config       : CONFIG,
+            newNotification: {},
+            notifications: [
+//                {
+//                    currency   : "ADA",
+//                    interval   : 30,
+//                    startPrice : 0.00001194,
+//                    percentUp  : 2,
+//                    percentDown: 2,
+//                    active: true
+//                }
+
+            ]
+        },
+        methods: {
+            async addNotification() {
+
+                console.log(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-${this.newNotification.currency}`)
+
+                try {
+                    const results = await axios.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-${this.newNotification.currency}`);
+
+                    console.log(results)
+                    if(!results.data.success){
+                        return alert("I was unable to find that currency.")
+                    }
+
+                    this.newNotification.startPrice = Number(this.newNotification.startPrice);
+                    this.newNotification.interval = Number(this.newNotification.interval);
+                    this.newNotification.percentUp = Number(this.newNotification.percentUp);
+                    this.newNotification.percentDown = Number(this.newNotification.percentDown);
+                    this.newNotification.active = true;
+
+                    console.log(this.newNotification)
+
+                    this.notifications.push(this.newNotification);
+                    this.newNotification = {};
+                } catch(err){
+                    alert(err)
+                }
+
+            }
+        },
+        mounted() {
+
+            let counter = 0;
+
+            setInterval(async () => {
+
+                // If there are no notifications, we're finished for this round.
+
+                if (this.notifications.length === 0) {
+
+                    // Terminate current interval.
+
+                    return;
+                }
+
+                counter++;
+
+                // Reset minute counter at ~60 seconds.
+
+                if (counter > 600) {
+                    counter = 0;
+                }
+
+                // Loop through each of the notifications.
+
+                for (const notification of this.notifications) {
+
+                    // If notification is not active, continue on to the next notification.
+
+                    if(!notification.active){
+                        continue;
+                    }
+
+                    // If it's not time to check, move on to the next notification.
+
+                    if (notification.interval !== counter / 10) {
+                        continue;
+                    }
+
+                    // Try to check the currency. Don't die if something goes wrong.
+
+                    try {
+
+                        // Fetch the data from bittrex
+
+                        const results = await axios.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-${notification.currency}`);
+
+                        // Set the price from the last sell.
+
+                        const price = results.data.result[0].Last;
+
+                        // Get the percentage of change.
+
+                        const percent = (price / notification.startPrice - 1) * 100;
+
+                        console.log(percent)
+
+                        // Check if the percentage down is greater than the percent down notification threshold.
+
+                        if (percent < 0 && (percent * percent) > notification.percentDown) {
+                            alert(`You're down ${percent}`)
+                        }
+
+                        // Check if the percentage up is greater than the percent up notification threshold.
+
+                        if (percent > 0 && percent > notification.percentUp) {
+                            alert(`You're up ${percent}`)
+                        }
+
+                    } catch (err) {
+                        alert(err)
+                    }
+
+                }
+            }, 100)
+        }
+    });
+</script>
+</body>
+</html>
