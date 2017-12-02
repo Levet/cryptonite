@@ -255,7 +255,7 @@
 
                         // Check if the percentage down is greater than the percent down notification threshold.
 
-                        if (percent < 0 && (percent * percent) > notification.percentDown) {
+                        if (percent < 0 && Math.abs(percent) > notification.percentDown) {
                             alert(`You're down ${percent}% on ${notification.currency}`)
                         }
 
