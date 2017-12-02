@@ -55,42 +55,90 @@
             <a class="mdl-navigation__link" href="">Holdings</a>
         </nav>
     </div>
-    <main class="mdl-layout__content">
+    <main class="mdl-layout__content" style="margin: 0 auto; width: 80%">
         <div class="page-content">
-            <h1>New Notification</h1>
-            <form action="#">
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="interval" v-model="newNotification.interval">
-                    <label class="mdl-textfield__label" for="interval">Interval to check (seconds)</label>
-                    <span class="mdl-textfield__error">Input is not a number!</span>
-                </div>
+            <br>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" @click.prevent="displayAddNotification">Add Notification</button>
+            <br>
+            <dialog class="mdl-dialog" id="addNotification" style="width: -webkit-fit-content; padding: 0">
+                <div class="demo-card-wide mdl-card mdl-shadow--2dp" >
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">New Notification</h2>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                        <form action="#">
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
+                                       id="interval" v-model="newNotification.interval">
+                                <label class="mdl-textfield__label" for="interval">Interval to check (seconds)</label>
+                                <span class="mdl-textfield__error">Input is not a number!</span>
+                            </div>
 
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="currency" v-model="newNotification.currency">
-                    <label class="mdl-textfield__label" for="currency">Currency to check</label>
-                </div>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" id="currency"
+                                       v-model="newNotification.currency">
+                                <label class="mdl-textfield__label" for="currency">Currency to check</label>
+                            </div>
 
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" id="startingPrice" v-model="newNotification.startPrice">
-                    <label class="mdl-textfield__label" for="startingPrice">Starting price</label>
-                </div>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" id="startingPrice"
+                                       v-model="newNotification.startPrice">
+                                <label class="mdl-textfield__label" for="startingPrice">Starting price</label>
+                            </div>
 
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="percentUp" v-model="newNotification.percentUp">
-                    <label class="mdl-textfield__label" for="percentUp">Percentage Up</label>
-                    <span class="mdl-textfield__error">Input is not a number!</span>
-                </div>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
+                                       id="percentUp" v-model="newNotification.percentUp">
+                                <label class="mdl-textfield__label" for="percentUp">Percentage Up</label>
+                                <span class="mdl-textfield__error">Input is not a number!</span>
+                            </div>
 
-                <div class="mdl-textfield mdl-js-textfield">
-                    <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="percentDown" v-model="newNotification.percentDown">
-                    <label class="mdl-textfield__label" for="percentDown">Percentage Down</label>
-                    <span class="mdl-textfield__error">Input is not a number!</span>
-                </div>
+                            <div class="mdl-textfield mdl-js-textfield">
+                                <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?"
+                                       id="percentDown" v-model="newNotification.percentDown">
+                                <label class="mdl-textfield__label" for="percentDown">Percentage Down</label>
+                                <span class="mdl-textfield__error">Input is not a number!</span>
+                            </div>
 
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" @click.prevent="addNotification">
-                    Save Notification
-                </button>
-            </form>
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+                                    @click.prevent="hideAddNotification" >
+                                Close
+                            </button>
+
+                            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
+                                    @click.prevent="addNotification" style="float: right">
+                                Save Notification
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </dialog>
+
+            <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric">Currency</th>
+                    <th>Interval</th>
+                    <th>Starting Price</th>
+                    <th>Percent Up</th>
+                    <th>Percent Down</th>
+                    <th>Active</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="notification in notifications">
+                    <td></td>
+                    <td class="mdl-data-table__cell--non-numeric">{{notification.currency}}</td>
+                    <td>{{notification.interval}} Seconds</td>
+                    <td>${{notification.startPrice}}</td>
+                    <td>{{notification.percentUp}}%</td>
+                    <td>{{notification.percentDown}}%</td>
+                    <td>{{notification.active}}</td>
+                </tr>
+                </tbody>
+            </table>
+
         </div>
     </main>
 </div>
@@ -98,9 +146,10 @@
     const app = new Vue({
         el     : '#app',
         data   : {
-            config       : CONFIG,
+            addingNotification: false,
+            config         : CONFIG,
             newNotification: {},
-            notifications: [
+            notifications  : [
 //                {
 //                    currency   : "ADA",
 //                    interval   : 30,
@@ -121,24 +170,30 @@
                     const results = await axios.get(`https://bittrex.com/api/v1.1/public/getmarketsummary?market=btc-${this.newNotification.currency}`);
 
                     console.log(results)
-                    if(!results.data.success){
+                    if (!results.data.success) {
                         return alert("I was unable to find that currency.")
                     }
 
-                    this.newNotification.startPrice = Number(this.newNotification.startPrice);
-                    this.newNotification.interval = Number(this.newNotification.interval);
-                    this.newNotification.percentUp = Number(this.newNotification.percentUp);
+                    this.newNotification.startPrice  = Number(this.newNotification.startPrice);
+                    this.newNotification.interval    = Number(this.newNotification.interval);
+                    this.newNotification.percentUp   = Number(this.newNotification.percentUp);
                     this.newNotification.percentDown = Number(this.newNotification.percentDown);
-                    this.newNotification.active = true;
+                    this.newNotification.active      = true;
 
                     console.log(this.newNotification)
 
                     this.notifications.push(this.newNotification);
                     this.newNotification = {};
-                } catch(err){
+                } catch (err) {
                     alert(err)
                 }
 
+            },
+            displayAddNotification(){
+                return document.querySelector("#addNotification").showModal();
+            },
+            hideAddNotification(){
+                return document.querySelector("#addNotification").close();
             }
         },
         mounted() {
@@ -170,7 +225,7 @@
 
                     // If notification is not active, continue on to the next notification.
 
-                    if(!notification.active){
+                    if (!notification.active) {
                         continue;
                     }
 
@@ -201,13 +256,13 @@
                         // Check if the percentage down is greater than the percent down notification threshold.
 
                         if (percent < 0 && (percent * percent) > notification.percentDown) {
-                            alert(`You're down ${percent}`)
+                            alert(`You're down ${percent}% on ${notification.currency}`)
                         }
 
                         // Check if the percentage up is greater than the percent up notification threshold.
 
                         if (percent > 0 && percent > notification.percentUp) {
-                            alert(`You're up ${percent}`)
+                            alert(`You're up ${percent}% on ${notification.currency}`)
                         }
 
                     } catch (err) {
